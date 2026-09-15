@@ -1,184 +1,99 @@
-# The Wanderer's Orrery
+# Universal on Tip (Solar System Orrery & Scrollytelling Space Flight)
 
-An interactive 3D solar system visualization built with Three.js, delivered as a single self-contained HTML file with no build step or dependency installation required.
-
-![Type](https://img.shields.io/badge/type-static%20HTML-informational)
-![Dependencies](https://img.shields.io/badge/dependencies-Three.js%20r0.128.0-blue)
-![License](https://img.shields.io/badge/license-MIT-lightgrey)
+An immersive, interactive 3D solar system visualization and scrollytelling experience built with **Next.js 16**, **React 19**, **Three.js**, **React Three Fiber**, and **Tailwind CSS**.
 
 ---
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Getting Started](#getting-started)
-  - [Requirements](#requirements)
-  - [Running Locally](#running-locally)
-  - [Hosting](#hosting)
-- [Controls](#controls)
-- [Project Structure](#project-structure)
-- [Configuration](#configuration)
-  - [Planet Data](#planet-data)
-  - [Starfield](#starfield)
-  - [Simulation Speed](#simulation-speed)
-  - [Color Palette](#color-palette)
-- [Technical Notes](#technical-notes)
-- [Browser Support](#browser-support)
-- [Troubleshooting](#troubleshooting)
-- [Roadmap](#roadmap)
-- [License](#license)
-
----
-
-## Overview
-
-The Wanderer's Orrery renders the eight planets of the solar system in orbit around a central sun, with an asteroid belt, a moon for Earth, and a starfield backdrop. It is built entirely in vanilla JavaScript on top of Three.js and its `OrbitControls` addon, with no framework, bundler, or package manager involved.
-
-The entire application — markup, styling, and logic — is contained in one file: `universe.html`.
 
 ## Features
 
-- Eight planets, each with distinct size, color, orbital radius, and orbital speed
-- Saturn's ring system
-- Earth's moon, orbiting on its own pivot
-- A procedurally scattered asteroid belt between Mars and Jupiter
-- Three-layer starfield for a sense of depth
-- Faint orbital path rings for each planet
-- Click-to-inspect info panel with astronomical facts and a short description per body
-- Playback controls: pause/resume and an adjustable time-scale slider
-- Fully responsive layout (desktop and mobile)
+- **Dual Exploration Modes**:
+  - **Scrollytelling Mode**: Smooth flight narrative synchronized with space shuttle video playback and orbital checkpoints.
+  - **Interactive 3D Sandbox**: Free navigation, orbit controls, zoom, pan, and real-time astronomical simulation.
+- **Solar System Simulation**:
+  - Central Sun with animated corona, surface glow shaders, and dynamic point lighting.
+  - 8 realistic planets with high-resolution textures, surface normals, specular highlights, and axial rotation.
+  - Earth system with night lights, cloud layer, atmospheric halo, and orbiting Moon.
+  - Saturn with ring geometry and custom transparency shader.
+  - Procedural Asteroid Belt and traveling Comet with particle tail.
+  - Spacetime gravitational curvature grid.
+- **Camera & Perspective Controls**:
+  - Multiple perspective modes: God's Eye, Free Orbit, Celestial Body Tracking, and Cinematic Views.
+  - Smooth camera transitions with target focus and auto-damping.
+- **Telemetry & Controls**:
+  - Live planetary telemetry drawer displaying radius, distance, orbital period, temperature, and planetary facts.
+  - Time controls: Play/pause, simulation speed slider, toggle orbits, atmospheric halos, spacetime grid, and asteroid belt.
+- **Standalone Prototype**:
+  - Includes the original single-file vanilla Three.js prototype in `prototype/index.html`.
+
+---
+
+## Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack)
+- **UI Library**: React 19, TypeScript
+- **3D Graphics**: [Three.js](https://threejs.org/), [@react-three/fiber](https://r3f.docs.pmnd.rs/), [@react-three/drei](https://github.com/pmndrs/drei)
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+---
 
 ## Getting Started
 
-### Requirements
+### Prerequisites
 
-- Any modern browser with WebGL support (Chrome, Firefox, Safari, Edge — desktop or mobile)
-- An active internet connection on first load, to fetch Three.js and OrbitControls from a CDN
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- `npm` or `yarn` / `pnpm`
 
-No local runtime, package manager, or build tooling is required.
+### Installation
 
-### Running Locally
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/AKKash123/Universal-on-tip.git
+   cd Universal-on-tip
+   ```
 
-1. Download `universe.html`.
-2. Open it directly in a browser (double-click, or drag it into a browser window).
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### Hosting
+3. Run the development server:
+   ```bash
+   npm run dev
+   ```
 
-Because the file is fully self-contained, it can be deployed as-is to any static host:
+4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-- Upload `universe.html` to any static file host (e.g. GitHub Pages, Netlify, Vercel, S3)
-- Or serve it from any basic web server — no server-side logic is required
+### Build for Production
 
-## Controls
+```bash
+npm run build
+npm run start
+```
 
-| Action | Input |
-|---|---|
-| Rotate camera | Click and drag |
-| Zoom | Scroll wheel / pinch |
-| Inspect a planet | Click on it |
-| Pause / resume | ❙❙ / ▶ button (bottom left) |
-| Adjust simulation speed | TIME slider (bottom left) |
-| Close info panel | ✕ in the panel |
+---
 
 ## Project Structure
 
-Everything lives in a single file:
-
 ```
-universe.html
-├── <style>   All CSS — theme variables, layout, header, side panel, controls
-├── <body>    Header, control bar, info panel, canvas container
-└── <script>  Scene setup, planet data, event handling, animation loop
-```
-
-Logical sections within the `<script>` block, in order:
-
-1. Renderer, camera, and `OrbitControls` setup
-2. Starfield generation (`makeStars`)
-3. Lighting
-4. Sun and glow layers
-5. Orbit ring geometry (`makeOrbitRing`)
-6. `planetData` — the single source of truth for every planet
-7. Planet, ring, and moon mesh construction
-8. Asteroid belt generation
-9. Raycasting and click-to-inspect panel logic
-10. Playback controls (pause/resume, speed slider)
-11. Resize handling
-12. Animation loop
-
-## Configuration
-
-All customization points are isolated and documented inline in the source; the key ones are summarized below.
-
-### Planet Data
-
-Each planet is defined as an object in the `planetData` array:
-
-```js
-{
-  name: 'Earth',
-  kind: 'Terrestrial planet',
-  dist: 37,       // orbital radius
-  size: 1.8,      // sphere radius
-  color: 0x4c86c9,
-  speed: 1.0,     // relative orbital speed
-  moon: true,     // adds an orbiting moon
-  facts: { 'Diameter': '12,742 km', /* ... */ },
-  blurb: 'A short descriptive line shown in the info panel.'
-}
+Universal-on-tip/
+├── public/
+│   ├── textures/            # High-resolution celestial body textures
+│   └── videos/              # Scrollytelling shuttle video
+├── src/
+│   ├── app/                 # Next.js App Router (layout, page, global styles)
+│   ├── components/          # 3D canvas, camera controller, celestial bodies, effects
+│   │   └── UI/              # Top navigation, telemetry drawer, time controls, story overlay
+│   ├── data/                # Astronomical data and planetary configurations
+│   ├── shaders/             # Custom GLSL shaders
+│   └── utils/               # Procedural texture helpers
+├── prototype/
+│   └── index.html           # Original standalone single-file Three.js prototype
+└── package.json
 ```
 
-To add, remove, or modify a planet, edit this array only — mesh creation, orbit rings, and the info panel all read from it automatically. Note that sizes and distances are scale-broken for visual clarity; they are not astronomically proportional.
-
-### Starfield
-
-Star layers are generated by `makeStars(count, radius, size, color)`, called once per layer. Adjust the arguments to change density, spread, point size, or tint for each layer.
-
-### Simulation Speed
-
-The TIME slider is bound to `speedMult` and ranges from 0 to 5× by default. Its bounds are set on the `<input type="range">` element in the HTML (`min`, `max`, `value`).
-
-### Color Palette
-
-All UI colors are defined once as CSS custom properties at the top of the `<style>` block (`--void`, `--gold`, `--cyan`, `--text`, etc.), so the visual theme can be adjusted from a single location without touching component styles.
-
-## Technical Notes
-
-- **Rendering:** `THREE.WebGLRenderer` with device-pixel-ratio capped at 2 for performance.
-- **Camera controls:** `THREE.OrbitControls` with damping enabled.
-- **Orbits:** each planet is parented to an `Object3D` pivot; rotating the pivot produces the orbit, decoupled from the planet's own axial spin.
-- **Selection:** `THREE.Raycaster` against planet meshes on click, driving the info panel.
-- **Dependencies:** loaded from jsdelivr —
-  - `three@0.128.0/build/three.min.js`
-  - `three@0.128.0/examples/js/controls/OrbitControls.js`
-
-  Both must remain on the same Three.js version, since `OrbitControls` is an unversioned addon built against a specific core release.
-
-## Browser Support
-
-Requires WebGL. Supported on all current desktop and mobile browsers. Older browsers or devices without WebGL, and environments with strict network policies that block CDN requests, will not render the scene.
-
-## Troubleshooting
-
-**Blank or black screen on load**
-Open the browser console. This is almost always a failed CDN request for Three.js or OrbitControls — check network connectivity or any firewall/proxy blocking `cdn.jsdelivr.net`.
-
-**`THREE.OrbitControls is not a constructor`**
-Indicates a version mismatch between the core Three.js script and the OrbitControls script. Confirm both `<script>` tags reference the identical version (currently `0.128.0`).
-
-**Scene loads but is empty/dark**
-Check that WebGL is enabled in the browser and not disabled by an extension or system graphics policy.
-
-## Roadmap
-
-Potential future enhancements, not currently implemented:
-
-- Photographic textures via `THREE.TextureLoader` in place of flat colors
-- Elliptical orbits with accurate eccentricity and inclination
-- Toggleable real-world scale mode
-- Additional bodies (dwarf planets, comets)
+---
 
 ## License
 
-MIT — free to use, modify, and distribute.
+MIT License — feel free to explore, modify, and build upon this cosmic journey.
